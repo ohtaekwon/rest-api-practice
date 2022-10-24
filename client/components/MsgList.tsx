@@ -1,11 +1,12 @@
-import React, { FC } from "react";
+import React, { useState, FC } from "react";
 import styled from "styled-components";
+import MsgInput from "./MsgInput";
 import MsgItem from "./MsgItem";
 type Props = {};
 
 const UserIds = ["roy", "jay"];
 const getRandomUserId = () => UserIds[Math.round(Math.random())];
-const msgs = Array(50)
+const originalMsgs = Array(50)
   .fill(0)
   .map((_, index) => ({
     id: index + 1,
@@ -17,13 +18,33 @@ const msgs = Array(50)
 
 const MsgList: FC<Props> = (props: Props): JSX.Element => {
   const {} = props;
+  const [msgs, setMsgs] = useState(originalMsgs);
+
+  const onCreate = (text) => {
+    const newMsg = {
+      id: msgs.length + 1,
+      userId: getRandomUserId(),
+      timestamp: Date.now(),
+      text: `${msgs.length + 1} - ${text}`,
+    };
+    setMsgs((msgs) => [newMsg, ...msgs]);
+    console.log("msg", msgs);
+  };
+
   return (
-    <Messages>
-      {msgs.map((item) => (
-        <MsgItem key={item.id} {...item} />
-      ))}
-    </Messages>
+    <React.Fragment>
+      <MsgInput mutate={onCreate} />
+      <Messages>
+        {msgs.map((item) => (
+          <MsgItem key={item.id} {...item} />
+        ))}
+      </Messages>
+    </React.Fragment>
   );
 };
 export default MsgList;
-const Messages = styled.ul``;
+
+const Messages = styled.ul`
+  width: 100%;
+  padding: 0;
+`;
