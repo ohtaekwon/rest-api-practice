@@ -1,54 +1,44 @@
-import React, { useState, FC } from "react";
+import React, { useState, FC, useEffect } from "react";
+import { useRouter } from "next/router";
 import styled from "styled-components";
+import fetcher from "../fetcher";
 import MsgInput from "./MsgInput";
 import MsgItem from "./MsgItem";
+
 type Props = {};
-
-const UserIds = ["BTS", "SON", "BLACK_PINK", "IU"];
-const getRandomUserId = () => UserIds[Math.round(Math.random() * 3)];
-const originalMsgs = Array(50)
-  .fill(0)
-  .map((_, index) => ({
-    id: index + 1,
-    userId: getRandomUserId(),
-    timestamp: 123456789123 + index * 1000 * 60,
-    text: `${index + 1} mock text`,
-  }))
-  .reverse();
-
-const MsgList: FC<Props> = (props: Props): JSX.Element => {
-  const {} = props;
-  const [msgs, setMsgs] = useState(originalMsgs);
+const MsgList: FC<Props> = ({}: Props): JSX.Element => {
+  const { query } = useRouter();
+  const userId = query.userId || query.userid || "";
+  const [msgs, setMsgs] = useState([]);
   const [editingId, setEditingId] = useState(null);
 
-  const onCreate = (text) => {
-    const newMsg = {
-      id: msgs.length + 1,
-      userId: getRandomUserId(),
-      timestamp: Date.now(),
-      text: `${msgs.length + 1} - ${text}`,
-    };
+  const onCreate = async (text) => {
+    const newMsg = await fetcher("post", "/messages", { text, userId });
+    if (!newMsg) throw Error("something is wrong");
     setMsgs((msgs) => [newMsg, ...msgs]);
     console.log("msg", msgs);
   };
-  // console.log(JSON.stringify(originalMsgs));
-  const onUpdate = (text, id) => {
+
+  const onUpdate = async (text, id) => {
+    const newMsg = await fetcher("put", `/messages/${id}`, { text, userId });
+    if (!newMsg) throw Error("something is wrong");
     setMsgs((msgs) => {
       const targetIndex = msgs.findIndex((msg) => msg.id === id); // 값이 없으면 -1
       if (targetIndex < 0) return msgs;
       const newMsgs = [...msgs];
-      newMsgs.splice(targetIndex, 1, {
-        // 새로운 메시지
-        ...msgs[targetIndex],
-        text,
-      });
+      newMsgs.splice(targetIndex, 1, newMsg);
       return newMsgs;
     });
     doneEdit();
   };
-  const onDelete = (id) => {
+  const onDelete = async (id) => {
+    const receivedId = await fetcher("delete", `/messages/${id}`, {
+      params: { userId }, // object 주의
+    });
+    if (!receivedId) throw Error("something is wrong");
+
     setMsgs((msgs) => {
-      const targetIndex = msgs.findIndex((msg) => msg.id === id); // 값이 없으면 -1
+      const targetIndex = msgs.findIndex((msg) => msg.id === receivedId + ""); // 값이 없으면 -1
       if (targetIndex < 0) return msgs;
       const newMsgs = [...msgs];
       newMsgs.splice(targetIndex, 1 /* 새로운 데이터 없음*/);
@@ -57,9 +47,19 @@ const MsgList: FC<Props> = (props: Props): JSX.Element => {
   };
 
   const doneEdit = () => setEditingId(null);
+
+  const getMessages = async () => {
+    const msgs = await fetcher("get", "/messages");
+    setMsgs(msgs);
+  };
+
+  useEffect(() => {
+    getMessages();
+  }, []);
+
   return (
     <React.Fragment>
-      <MsgInput mutate={onCreate} />
+      {userId && <MsgInput mutate={onCreate} />}
       <Messages>
         {msgs.map((item) => (
           <MsgItem
@@ -69,6 +69,7 @@ const MsgList: FC<Props> = (props: Props): JSX.Element => {
             isEditing={editingId === item.id}
             startEdit={() => setEditingId(item.id)}
             onDelete={() => onDelete(item.id)}
+            myId={userId}
           />
         ))}
       </Messages>

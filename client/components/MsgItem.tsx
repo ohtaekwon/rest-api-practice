@@ -11,6 +11,7 @@ type Props = {
   isEditing: boolean;
   startEdit: () => void;
   onDelete: (id: number) => void;
+  myId: string | string[] | undefined;
 };
 const MsgItem: FC<Props> = (props): JSX.Element => {
   const {
@@ -22,6 +23,7 @@ const MsgItem: FC<Props> = (props): JSX.Element => {
     isEditing,
     startEdit,
     onDelete,
+    myId,
   } = props;
 
   return (
@@ -47,14 +49,16 @@ const MsgItem: FC<Props> = (props): JSX.Element => {
             <Text>{text}</Text>
           )}
         </TextContainer>
-        <ButtonContainer>
-          <Button type="button" onClick={startEdit}>
-            수정하기
-          </Button>
-          <Button type="button" onClick={onDelete}>
-            삭제하기
-          </Button>
-        </ButtonContainer>
+        {myId === userId && (
+          <ButtonContainer>
+            <Button type="button" onClick={startEdit}>
+              수정하기
+            </Button>
+            <Button type="button" onClick={onDelete}>
+              삭제하기
+            </Button>
+          </ButtonContainer>
+        )}
       </Container>
     </Wrapper>
   );
