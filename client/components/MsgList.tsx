@@ -4,7 +4,7 @@ import MsgInput from "./MsgInput";
 import MsgItem from "./MsgItem";
 type Props = {};
 
-const UserIds = ["블랙핑크", "손흥민", "BTS", "아이유"];
+const UserIds = ["BTS", "SON", "BLACK_PINK", "IU"];
 const getRandomUserId = () => UserIds[Math.round(Math.random() * 3)];
 const originalMsgs = Array(50)
   .fill(0)
@@ -31,7 +31,7 @@ const MsgList: FC<Props> = (props: Props): JSX.Element => {
     setMsgs((msgs) => [newMsg, ...msgs]);
     console.log("msg", msgs);
   };
-
+  // console.log(JSON.stringify(originalMsgs));
   const onUpdate = (text, id) => {
     setMsgs((msgs) => {
       const targetIndex = msgs.findIndex((msg) => msg.id === id); // 값이 없으면 -1
