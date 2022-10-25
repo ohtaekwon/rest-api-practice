@@ -9,6 +9,7 @@ const fileNames = {
 };
 
 export const readDB = (target) => {
+  // target: messages.json을 읽을지, users.json을 읽을지 결정
   try {
     return JSON.parse(fs.readFileSync(fileNames[target], "utf-8"));
   } catch (error) {
