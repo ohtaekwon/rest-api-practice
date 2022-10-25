@@ -2,11 +2,13 @@ import React, { FC, useRef } from "react";
 import styled from "styled-components";
 
 type Props = {
-  mutate: (text: any) => void;
+  mutate: (text: any, id?: number) => void;
+  id?: number;
+  text?: string;
 };
 
 const MsgInput: FC<Props> = (props): JSX.Element => {
-  const { mutate } = props;
+  const { mutate, id = undefined, text = "" } = props;
 
   const textRef = useRef(null);
   const onSubmit = (event) => {
@@ -14,11 +16,15 @@ const MsgInput: FC<Props> = (props): JSX.Element => {
     event.stopPropagation();
     const text = textRef.current.value;
     textRef.current.value = "";
-    mutate(text);
+    mutate(text, id);
   };
   return (
     <Form onSubmit={onSubmit}>
-      <TextArea ref={textRef} placeHolder={"내용을 입력해주세요"} />
+      <TextArea
+        ref={textRef}
+        placeHolder={"내용을 입력해주세요"}
+        defaultValue={text}
+      />
       <Button type="submit">확인</Button>
     </Form>
   );
@@ -37,4 +43,7 @@ const TextArea = styled.textarea`
   padding: 1rem;
 `;
 
-const Button = styled.button``;
+const Button = styled.button`
+  width: 5rem;
+  margin-left: 0.5rem;
+`;
