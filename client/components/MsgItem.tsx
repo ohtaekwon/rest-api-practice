@@ -71,7 +71,7 @@ const Wrapper = styled.ul`
   width: 100%;
   margin: 1rem 0;
   padding: 0;
-  background-color: #a0c0d7;
+  /* background-color: #a0c0d7; */
 `;
 const Container = styled.li`
   width: 100%;

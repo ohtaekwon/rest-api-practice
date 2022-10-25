@@ -1,9 +1,12 @@
-import React, { useState, FC, useEffect } from "react";
+import React, { FC, useState, useEffect, useRef } from "react";
 import { useRouter } from "next/router";
 import styled from "styled-components";
+
 import fetcher from "../fetcher";
 import MsgInput from "./MsgInput";
 import MsgItem from "./MsgItem";
+
+import useInfiniteScroll from "../hooks/useInfiniteScroll";
 
 type Props = {};
 const MsgList: FC<Props> = ({}: Props): JSX.Element => {
@@ -11,6 +14,9 @@ const MsgList: FC<Props> = ({}: Props): JSX.Element => {
   const userId = query.userId || query.userid || "";
   const [msgs, setMsgs] = useState([]);
   const [editingId, setEditingId] = useState(null);
+  const [hasNext, setHasNext] = useState(true);
+  const fetchMoreEl = useRef(null);
+  const intersecting = useInfiniteScroll(fetchMoreEl);
 
   const onCreate = async (text) => {
     const newMsg = await fetcher("post", "/messages", { text, userId });
@@ -49,14 +55,22 @@ const MsgList: FC<Props> = ({}: Props): JSX.Element => {
   const doneEdit = () => setEditingId(null);
 
   const getMessages = async () => {
-    const msgs = await fetcher("get", "/messages");
-    setMsgs(msgs);
+    const newMsgs = await fetcher("get", "/messages", {
+      params: { cursor: msgs[msgs.length - 1]?.id || "" },
+    });
+    if (newMsgs.length === 0) {
+      setHasNext(false);
+      return;
+    }
+    setMsgs((msgs) => [...msgs, ...newMsgs]);
+
+    console.log("new", newMsgs);
   };
 
   useEffect(() => {
-    getMessages();
-  }, []);
-
+    if (intersecting && hasNext) getMessages();
+  }, [intersecting]);
+  console.log("msgs", msgs);
   return (
     <React.Fragment>
       {userId && <MsgInput mutate={onCreate} />}
@@ -73,6 +87,7 @@ const MsgList: FC<Props> = ({}: Props): JSX.Element => {
           />
         ))}
       </Messages>
+      <FetchMore ref={fetchMoreEl} />
     </React.Fragment>
   );
 };
@@ -81,4 +96,10 @@ export default MsgList;
 const Messages = styled.ul`
   width: 100%;
   padding: 0;
+`;
+const FetchMore = styled.div`
+  border-color: transparent;
+  height: 1px;
+  margin-bottom: 1px;
+  padding-bottom: 1px;
 `;
