@@ -1,5 +1,6 @@
 import React, { FC } from "react";
 import styled from "styled-components";
+import { UserType } from "../types/users";
 import MsgInput from "./MsgInput";
 
 type Props = {
@@ -12,6 +13,7 @@ type Props = {
   startEdit: () => void;
   onDelete: (id: string) => void;
   myId: string | string[] | undefined;
+  user: UserType;
 };
 const MsgItem: FC<Props> = (props): JSX.Element => {
   const {
@@ -24,12 +26,13 @@ const MsgItem: FC<Props> = (props): JSX.Element => {
     startEdit,
     onDelete,
     myId,
+    user,
   } = props;
 
   return (
     <Wrapper>
       <Container>
-        <Id>{userId} </Id>
+        <Id>{user?.nickName} </Id>
         <Sub>
           {new Date(timestamp).toLocaleString("ko-KR", {
             year: "numeric",

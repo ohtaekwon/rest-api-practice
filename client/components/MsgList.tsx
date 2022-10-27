@@ -8,13 +8,14 @@ import MsgItem from "./MsgItem";
 
 import useInfiniteScroll from "../hooks/useInfiniteScroll";
 import { MessageType } from "../types/messages";
+import { UsersType } from "../types/users";
 
 type Props = {
   smsgs: MessageType[];
+  users: UsersType;
 };
 const MsgList: FC<Props> = (props): JSX.Element => {
-  const { smsgs } = props;
-
+  const { smsgs, users } = props;
   const { query } = useRouter();
   const userId = query.userId || query.userid || "";
   const [msgs, setMsgs] = useState(smsgs);
@@ -27,7 +28,7 @@ const MsgList: FC<Props> = (props): JSX.Element => {
     const newMsg = await fetcher("post", "/messages", { text, userId });
     if (!newMsg) throw Error("something is wrong");
     setMsgs((msgs) => [newMsg, ...msgs]);
-    console.log("msg", msgs);
+    // console.log("msg", msgs);
   };
 
   const onUpdate = async (text, id) => {
@@ -68,14 +69,15 @@ const MsgList: FC<Props> = (props): JSX.Element => {
       return;
     }
     setMsgs((msgs) => [...msgs, ...newMsgs]);
-
-    console.log("new", newMsgs);
+    // console.log("new", newMsgs);
   };
 
   useEffect(() => {
     if (intersecting && hasNext) getMessages();
   }, [intersecting]);
-  console.log("msgs", msgs);
+  // console.log("msgs", msgs);
+
+  console.log("render");
   return (
     <React.Fragment>
       {userId && <MsgInput mutate={onCreate} />}
@@ -83,12 +85,13 @@ const MsgList: FC<Props> = (props): JSX.Element => {
         {msgs.map((item) => (
           <MsgItem
             key={item.id}
-            {...item}
             onUpdate={onUpdate}
             isEditing={editingId === item.id}
             startEdit={() => setEditingId(item.id)}
             onDelete={() => onDelete(item.id)}
             myId={userId}
+            user={users[item.userId]}
+            {...item}
           />
         ))}
       </Messages>
