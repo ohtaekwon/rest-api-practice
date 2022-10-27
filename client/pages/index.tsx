@@ -1,18 +1,37 @@
 import React from "react";
-import type { NextPage } from "next";
+import type {
+  GetServerSideProps,
+  GetServerSidePropsContext,
+  NextPage,
+} from "next";
 import styled from "styled-components";
 import MsgList from "../components/MsgList";
+import fetcher from "../fetcher";
+import { MessageType } from "../types/messages";
 
-const Home: NextPage = () => (
-  <Main>
-    <PageTitleContainer>
-      <PageTitle>SIMPLE SNS</PageTitle>
-    </PageTitleContainer>
-    <MsgList />
-  </Main>
-);
+const Home: NextPage<{ smsgs: MessageType[] }> = (props) => {
+  const { smsgs } = props;
+  console.log("smsgs", smsgs);
+  return (
+    <Main>
+      <PageTitleContainer>
+        <PageTitle>SIMPLE SNS</PageTitle>
+      </PageTitleContainer>
+      <MsgList smsgs={smsgs} />
+    </Main>
+  );
+};
 
 export default Home;
+
+export const getServerSideProps: GetServerSideProps = async (
+  context: GetServerSidePropsContext
+) => {
+  const smsgs = await fetcher("get", "/messages");
+  return {
+    props: { smsgs },
+  };
+};
 
 const Main = styled.main`
   width: 600px;
