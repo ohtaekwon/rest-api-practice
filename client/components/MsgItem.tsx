@@ -3,14 +3,14 @@ import styled from "styled-components";
 import MsgInput from "./MsgInput";
 
 type Props = {
-  id: number;
+  id: string;
   userId: string;
   timestamp: number;
   text: string;
   onUpdate: (text, id) => void;
   isEditing: boolean;
   startEdit: () => void;
-  onDelete: (id: number) => void;
+  onDelete: (id: string) => void;
   myId: string | string[] | undefined;
 };
 const MsgItem: FC<Props> = (props): JSX.Element => {

@@ -7,12 +7,17 @@ import MsgInput from "./MsgInput";
 import MsgItem from "./MsgItem";
 
 import useInfiniteScroll from "../hooks/useInfiniteScroll";
+import { MessageType } from "../types/messages";
 
-type Props = {};
-const MsgList: FC<Props> = ({}: Props): JSX.Element => {
+type Props = {
+  smsgs: MessageType[];
+};
+const MsgList: FC<Props> = (props): JSX.Element => {
+  const { smsgs } = props;
+
   const { query } = useRouter();
   const userId = query.userId || query.userid || "";
-  const [msgs, setMsgs] = useState([]);
+  const [msgs, setMsgs] = useState(smsgs);
   const [editingId, setEditingId] = useState(null);
   const [hasNext, setHasNext] = useState(true);
   const fetchMoreEl = useRef(null);

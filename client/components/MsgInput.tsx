@@ -2,8 +2,8 @@ import React, { FC, useRef } from "react";
 import styled from "styled-components";
 
 type Props = {
-  mutate: (text: any, id?: number) => void;
-  id?: number;
+  mutate: (text: any, id?: string) => void;
+  id?: string;
   text?: string;
 };
 
