@@ -1,4 +1,5 @@
 import React, { FC, ReactNode, useEffect } from "react";
+import "./index.scss";
 import type { AppProps } from "next/app";
 import GlobalStyles from "../styles/Globalstyle";
 
