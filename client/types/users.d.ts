@@ -5,4 +5,5 @@ export type UserType = {
 
 export interface UsersType {
   [key: string]: UserType;
+  find: any;
 }

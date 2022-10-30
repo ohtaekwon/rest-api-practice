@@ -1,8 +1,10 @@
 import React, { FC, useRef } from "react";
+import { UseMutateFunction } from "react-query";
 import styled from "styled-components";
 
 type Props = {
-  mutate: (text: any, id?: string) => void;
+  // mutate: ({text: string, id?: string}) => void;
+  mutate: any;
   id?: string;
   text?: string;
 };
@@ -16,7 +18,7 @@ const MsgInput: FC<Props> = (props): JSX.Element => {
     event.stopPropagation();
     const text = textRef.current.value;
     textRef.current.value = "";
-    mutate(text, id);
+    mutate({ text, id });
   };
   return (
     <Form onSubmit={onSubmit}>
