@@ -6,13 +6,15 @@ import type {
 } from "next";
 import styled from "styled-components";
 import MsgList from "../components/MsgList";
-import fetcher from "../fetcher";
+import { fetcher } from "../query/queryClient";
 import { MessageType } from "../types/messages";
 import { UsersType } from "../types/users";
+import { GET_MESSAGES } from "../graphql/message";
+import { GET_USERS } from "../graphql/users";
 
 const Home: NextPage<{ smsgs: MessageType[]; users: UsersType }> = (props) => {
   const { smsgs, users } = props;
-  // console.log("smsgs", smsgs);
+  console.log("smsgs", smsgs);
   return (
     <Main>
       <PageTitleContainer>
@@ -28,8 +30,9 @@ export default Home;
 export const getServerSideProps: GetServerSideProps = async (
   context: GetServerSidePropsContext
 ) => {
-  const smsgs = await fetcher("get", "/messages");
-  const users = await fetcher("get", "/users");
+  const { messages: smsgs } = await fetcher(GET_MESSAGES);
+  const { users } = await fetcher(GET_USERS);
+
   return {
     props: { smsgs, users },
   };
