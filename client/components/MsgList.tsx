@@ -11,7 +11,11 @@ import MsgItem from "./MsgItem";
 // import useInfiniteScroll from "../hooks/useInfiniteScroll";
 import { MessageType } from "../types/messages";
 import { UsersType } from "../types/users";
-import { CREATE_MESSAGE, GET_MESSAGES } from "../graphql/message";
+import {
+  CREATE_MESSAGE,
+  GET_MESSAGES,
+  UPDATE_MESSAGE,
+} from "../graphql/message";
 
 type Props = {
   smsgs: MessageType[];
@@ -28,6 +32,28 @@ const MsgList: FC<Props> = (props): JSX.Element => {
   // const fetchMoreEl = useRef(null);
   // const intersecting = useInfiniteScroll(fetchMoreEl);
 
+  // const onCreate = async (text) => {
+  //   const newMsg = await fetcher("post", "/messages", { text, userId });
+  //   if (!newMsg) throw Error("something is wrong");
+  //   setMsgs((msgs) => [newMsg, ...msgs]);
+  // };
+
+  // const onUpdate = async (text, id) => {
+  //   const newMsg = await fetcher(
+  //     "put",
+  //     `/messages/${id}`
+  //     //{ text, userId }
+  //   );
+  //   if (!newMsg) throw Error("something is wrong");
+  //   setMsgs((msgs) => {
+  //     const targetIndex = msgs.findIndex((msg) => msg.id === id); // 값이 없으면 -1
+  //     if (targetIndex < 0) return msgs;
+  //     const newMsgs = [...msgs];
+  //     newMsgs.splice(targetIndex, 1, newMsg);
+  //     return newMsgs;
+  //   });
+  //   doneEdit();
+  // };
   const { mutate: onCreate } = useMutation(
     ({ text }: any) => fetcher(CREATE_MESSAGE, { text, userId }),
     {
@@ -40,29 +66,24 @@ const MsgList: FC<Props> = (props): JSX.Element => {
       },
     }
   );
+  const { mutate: onUpdate } = useMutation(
+    ({ text, id }: any) => fetcher(UPDATE_MESSAGE, { text, id, userId }),
+    {
+      onSuccess: ({ updateMessage }) => {
+        client.setQueryData(QueryKeys.MESSAGES, (old: any) => {
+          const targetIndex = old?.messages.findIndex(
+            (msg) => msg.id === updateMessage.id
+          ); // 값이 없으면 -1
+          if (targetIndex < 0) return old;
+          const newMsgs = [...old.messages];
+          newMsgs.splice(targetIndex, 1, updateMessage);
+          return { messages: newMsgs };
+        });
+        doneEdit();
+      },
+    }
+  );
 
-  // const onCreate = async (text) => {
-  //   const newMsg = await fetcher("post", "/messages", { text, userId });
-  //   if (!newMsg) throw Error("something is wrong");
-  //   setMsgs((msgs) => [newMsg, ...msgs]);
-  // };
-
-  const onUpdate = async (text, id) => {
-    const newMsg = await fetcher(
-      "put",
-      `/messages/${id}`
-      //{ text, userId }
-    );
-    if (!newMsg) throw Error("something is wrong");
-    setMsgs((msgs) => {
-      const targetIndex = msgs.findIndex((msg) => msg.id === id); // 값이 없으면 -1
-      if (targetIndex < 0) return msgs;
-      const newMsgs = [...msgs];
-      newMsgs.splice(targetIndex, 1, newMsg);
-      return newMsgs;
-    });
-    doneEdit();
-  };
   const onDelete = async (id) => {
     const receivedId = await fetcher(
       "delete",
