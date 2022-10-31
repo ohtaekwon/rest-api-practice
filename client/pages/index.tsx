@@ -30,9 +30,13 @@ export default Home;
 export const getServerSideProps: GetServerSideProps = async (
   context: GetServerSidePropsContext
 ) => {
-  const { messages: smsgs } = await fetcher(GET_MESSAGES);
-  const { users } = await fetcher(GET_USERS);
-
+  // 직렬 구조로, 요청이 두개 동시에 보내는 것이 아닌, 하나 보내고 기다리고, 다음 실행
+  // const { messages: smsgs } = await fetcher(GET_MESSAGES);
+  // const { users } = await fetcher(GET_USERS);
+  const [{ messages: smsgs }, { users }] = await Promise.all([
+    fetcher(GET_MESSAGES),
+    fetcher(GET_USERS),
+  ]); // 요청은 두개 동시에 보내고, 응답이 둘 다 올때까지 기다린다.
   return {
     props: { smsgs, users },
   };
