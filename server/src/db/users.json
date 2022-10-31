@@ -1,6 +1,6 @@
 {
-  "BTS": { "id": "BTS", "nickName": "방탄소년단" },
-  "SON": { "id": "SON", "nickName": "손흥민" },
-  "BLACK_PINK": { "id": "BlackPink", "nickName": "블랙핑크" },
-  "IU": { "id": "IU", "nickName": "아이유" }
+  "BTS": { "id": "bts", "nickName": "방탄소년단" },
+  "SON": { "id": "son", "nickName": "손흥민" },
+  "BLACK_PINK": { "id": "blackPink", "nickName": "블랙핑크" },
+  "IU": { "id": "iu", "nickName": "아이유" }
 }
