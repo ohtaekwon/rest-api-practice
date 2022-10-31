@@ -28,7 +28,6 @@ const MsgItem: FC<Props> = (props): JSX.Element => {
     myId,
     user,
   } = props;
-
   return (
     <Wrapper>
       <Container>

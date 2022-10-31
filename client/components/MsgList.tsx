@@ -13,6 +13,7 @@ import { MessageType } from "../types/messages";
 import { UsersType } from "../types/users";
 import {
   CREATE_MESSAGE,
+  DELETE_MESSAGE,
   GET_MESSAGES,
   UPDATE_MESSAGE,
 } from "../graphql/message";
@@ -54,6 +55,26 @@ const MsgList: FC<Props> = (props): JSX.Element => {
   //   });
   //   doneEdit();
   // };
+
+  // const onDelete = async (id) => {
+  //   const receivedId = await fetcher(
+  //     "delete",
+  //     `/messages/${id}`
+  //     // {
+  //     //   params: { userId }, // object 주의
+  //     // }
+  //   );
+  //   if (!receivedId) throw Error("something is wrong");
+
+  //   setMsgs((msgs) => {
+  //     const targetIndex = msgs.findIndex((msg) => msg.id === receivedId + ""); // 값이 없으면 -1
+  //     if (targetIndex < 0) return msgs;
+  //     const newMsgs = [...msgs];
+  //     newMsgs.splice(targetIndex, 1 /* 새로운 데이터 없음*/);
+  //     return newMsgs;
+  //   });
+  // };
+
   const { mutate: onCreate } = useMutation(
     ({ text }: any) => fetcher(CREATE_MESSAGE, { text, userId }),
     {
@@ -67,7 +88,8 @@ const MsgList: FC<Props> = (props): JSX.Element => {
     }
   );
   const { mutate: onUpdate } = useMutation(
-    ({ text, id }: any) => fetcher(UPDATE_MESSAGE, { text, id, userId }),
+    ({ text, id }: { text: string; id: string }) =>
+      fetcher(UPDATE_MESSAGE, { text, id, userId }),
     {
       onSuccess: ({ updateMessage }) => {
         client.setQueryData(QueryKeys.MESSAGES, (old: any) => {
@@ -84,24 +106,22 @@ const MsgList: FC<Props> = (props): JSX.Element => {
     }
   );
 
-  const onDelete = async (id) => {
-    const receivedId = await fetcher(
-      "delete",
-      `/messages/${id}`
-      // {
-      //   params: { userId }, // object 주의
-      // }
-    );
-    if (!receivedId) throw Error("something is wrong");
-
-    setMsgs((msgs) => {
-      const targetIndex = msgs.findIndex((msg) => msg.id === receivedId + ""); // 값이 없으면 -1
-      if (targetIndex < 0) return msgs;
-      const newMsgs = [...msgs];
-      newMsgs.splice(targetIndex, 1 /* 새로운 데이터 없음*/);
-      return newMsgs;
-    });
-  };
+  const { mutate: onDelete } = useMutation(
+    (id: string) => fetcher(DELETE_MESSAGE, { id, userId }),
+    {
+      onSuccess: ({ deleteMessage: deletedId }) => {
+        client.setQueryData(QueryKeys.MESSAGES, (old: any) => {
+          const targetIndex = old.messages.findIndex(
+            (msg) => msg.id === deletedId
+          );
+          if (targetIndex < 0) return old;
+          const newMsgs = [...old.messages];
+          newMsgs.splice(targetIndex, 1);
+          return { messages: newMsgs };
+        });
+      },
+    }
+  );
 
   const doneEdit = () => setEditingId(null);
   const queryFn = () => fetcher(GET_MESSAGES);
@@ -141,7 +161,6 @@ const MsgList: FC<Props> = (props): JSX.Element => {
   // }, [intersecting]);
 
   console.log("render");
-
   return (
     <React.Fragment>
       {userId && <MsgInput mutate={onCreate} />}
@@ -154,7 +173,7 @@ const MsgList: FC<Props> = (props): JSX.Element => {
             startEdit={() => setEditingId(item.id)}
             onDelete={() => onDelete(item.id)}
             myId={userId}
-            user={users.find((x) => userId === x.userId)}
+            user={users.find((x) => x.id === item.userId)}
             {...item}
           />
         ))}
