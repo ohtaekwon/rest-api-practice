@@ -24,6 +24,18 @@ import {
   UPDATE_MESSAGE,
 } from "../graphql/message";
 
+const findTargetMsgIndex = (pages, id) => {
+  let msgIndex = -1;
+  const pageIndex = pages.findIndex(({ messages }) => {
+    msgIndex = messages.findIndex((msg) => msg.id === id);
+    if (msgIndex > -1) {
+      return true;
+    }
+    return false;
+  });
+  return { pageIndex, msgIndex };
+};
+
 type Props = {
   smsgs: MessageType[];
   users: UsersType;
@@ -65,19 +77,26 @@ const MsgList: FC<Props> = ({ smsgs, users }): JSX.Element => {
       },
     }
   );
+
   const { mutate: onUpdate } = useMutation(
     ({ text, id }: { text: string; id: string }) =>
       fetcher(UPDATE_MESSAGE, { text, id, userId }),
     {
       onSuccess: ({ updateMessage }) => {
         client.setQueryData(QueryKeys.MESSAGES, (old: any) => {
-          const targetIndex = old?.messages.findIndex(
-            (msg) => msg.id === updateMessage.id
-          ); // 값이 없으면 -1
-          if (targetIndex < 0) return old;
-          const newMsgs = [...old.messages];
-          newMsgs.splice(targetIndex, 1, updateMessage);
-          return { messages: newMsgs };
+          const { pageIndex, msgIndex } = findTargetMsgIndex(
+            old.pages,
+            updateMessage.id
+          );
+
+          if (pageIndex < 0 || msgIndex < 0) return old;
+          const newPages = [...old.pages];
+          newPages[pageIndex] = { messages: [...newPages[pageIndex].messages] };
+          newPages[pageIndex].messages.splice(msgIndex, 1, updateMessage);
+          return {
+            pageParam: old.pageParam,
+            pages: newPages,
+          };
         });
         doneEdit();
       },
