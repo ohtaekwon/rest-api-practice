@@ -10,10 +10,12 @@ const setMsgs = (data) => writeDB("messages", data);
  */
 const messageResolver = {
   Query: {
-    messages: (parent, arg, context) => {
+    messages: (parent, { cursor = "" }, context) => {
       // console.log(parent, args, context)
       const { models } = context;
-      return models.messages;
+      const fromIndex =
+        models.messages.findIndex((msg) => msg.id === cursor) + 1; // 최초에는 0부터
+      return models.messages?.slice(fromIndex, fromIndex + 15) || [];
     },
     message: (parent, { id = "" }, { models }) => {
       return models.messages.find((msg) => msg.id === id);
