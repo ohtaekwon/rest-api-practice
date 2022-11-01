@@ -2,13 +2,7 @@ import React, { FC, useState, useEffect, useRef } from "react";
 import styled from "styled-components";
 
 import { useRouter } from "next/router";
-import {
-  useQueryClient,
-  useMutation,
-  useQuery,
-  useInfiniteQuery,
-  InfiniteData,
-} from "react-query";
+import { useQueryClient, useMutation, useInfiniteQuery } from "react-query";
 
 import { QueryKeys, fetcher } from "../query";
 import MsgInput from "./MsgInput";
@@ -23,18 +17,7 @@ import {
   GET_MESSAGES,
   UPDATE_MESSAGE,
 } from "../graphql/message";
-
-const findTargetMsgIndex = (pages, id) => {
-  let msgIndex = -1;
-  const pageIndex = pages.findIndex(({ messages }) => {
-    msgIndex = messages.findIndex((msg) => msg.id === id);
-    if (msgIndex > -1) {
-      return true;
-    }
-    return false;
-  });
-  return { pageIndex, msgIndex };
-};
+import { findTargetMsgIndex, getNewMessages } from "../utils/helpers/messages";
 
 type Props = {
   smsgs: MessageType[];
@@ -90,13 +73,17 @@ const MsgList: FC<Props> = ({ smsgs, users }): JSX.Element => {
           );
 
           if (pageIndex < 0 || msgIndex < 0) return old;
-          const newPages = [...old.pages];
-          newPages[pageIndex] = { messages: [...newPages[pageIndex].messages] };
-          newPages[pageIndex].messages.splice(msgIndex, 1, updateMessage);
-          return {
-            pageParam: old.pageParam,
-            pages: newPages,
-          };
+          const newMsgs = getNewMessages(old);
+          // const newPages = [...old.pages];
+          // newPages[pageIndex] = { messages: [...newPages[pageIndex].messages] };
+          // newPages[pageIndex].messages.splice(msgIndex, 1, updateMessage);
+          newMsgs.pages[pageIndex].messages.splice(msgIndex, 1, updateMessage);
+          return newMsgs;
+          // {
+          //   // pageParam: old.pageParam,
+          //   // pages: newPages,
+
+          // };
         });
         doneEdit();
       },
@@ -108,13 +95,27 @@ const MsgList: FC<Props> = ({ smsgs, users }): JSX.Element => {
     {
       onSuccess: ({ deleteMessage: deletedId }) => {
         client.setQueryData(QueryKeys.MESSAGES, (old: any) => {
-          const targetIndex = old.messages.findIndex(
-            (msg) => msg.id === deletedId
+          // const { pageIndex, msgIndex } = findTargetMsgIndex(
+          //   old.pages,
+          //   deletedId
+          // );
+          // if (pageIndex < 0 || msgIndex) return old;
+          // const newPages = [...old.pages];
+          // newPages[pageIndex] = { messages: [...newPages[pageIndex].messages] };
+          // newPages[pageIndex].messages.splice(msgIndex, 1);
+          // return {
+          //   pageParam: old.pageParam,
+          //   pages: newPages,
+          // };
+          const { pageIndex, msgIndex } = findTargetMsgIndex(
+            old.pages,
+            deletedId
           );
-          if (targetIndex < 0) return old;
-          const newMsgs = [...old.messages];
-          newMsgs.splice(targetIndex, 1);
-          return { messages: newMsgs };
+          if (pageIndex < 0 || msgIndex < 0) return old;
+
+          const newMsgs = getNewMessages(old);
+          newMsgs.pages[pageIndex].messages.splice(msgIndex, 1);
+          return newMsgs;
         });
       },
     }
