@@ -1,14 +1,20 @@
-import React, { FC, useState, useEffect } from "react";
+import React, { FC, useState, useEffect, useRef } from "react";
 import styled from "styled-components";
 
 import { useRouter } from "next/router";
-import { useQueryClient, useMutation, useQuery } from "react-query";
+import {
+  useQueryClient,
+  useMutation,
+  useQuery,
+  useInfiniteQuery,
+  InfiniteData,
+} from "react-query";
 
 import { QueryKeys, fetcher } from "../query";
 import MsgInput from "./MsgInput";
 import MsgItem from "./MsgItem";
 
-// import useInfiniteScroll from "../hooks/useInfiniteScroll";
+import useInfiniteScroll from "../hooks/useInfiniteScroll";
 import { MessageType } from "../types/messages";
 import { UsersType } from "../types/users";
 import {
@@ -22,66 +28,38 @@ type Props = {
   smsgs: MessageType[];
   users: UsersType;
 };
-const MsgList: FC<Props> = (props): JSX.Element => {
-  const { smsgs, users } = props;
+const MsgList: FC<Props> = ({ smsgs, users }): JSX.Element => {
   const client = useQueryClient();
   const { query } = useRouter();
   const userId = query.userId || query.userid || "";
-  const [msgs, setMsgs] = useState(smsgs);
+  const [msgs, setMsgs] = useState([{ messages: smsgs }]);
   const [editingId, setEditingId] = useState(null);
   // const [hasNext, setHasNext] = useState(true);
-  // const fetchMoreEl = useRef(null);
-  // const intersecting = useInfiniteScroll(fetchMoreEl);
+  const fetchMoreEl = useRef(null);
+  const intersecting = useInfiniteScroll(fetchMoreEl);
 
-  // const onCreate = async (text) => {
-  //   const newMsg = await fetcher("post", "/messages", { text, userId });
-  //   if (!newMsg) throw Error("something is wrong");
-  //   setMsgs((msgs) => [newMsg, ...msgs]);
-  // };
+  const queryFn = ({ pageParam = "" }) =>
+    fetcher(GET_MESSAGES, { cursor: pageParam });
+  const queryOptions = {
+    getNextPageParam: ({ messages }) => {
+      return messages?.[messages.length - 1]?.id;
+    },
+  };
 
-  // const onUpdate = async (text, id) => {
-  //   const newMsg = await fetcher(
-  //     "put",
-  //     `/messages/${id}`
-  //     //{ text, userId }
-  //   );
-  //   if (!newMsg) throw Error("something is wrong");
-  //   setMsgs((msgs) => {
-  //     const targetIndex = msgs.findIndex((msg) => msg.id === id); // 값이 없으면 -1
-  //     if (targetIndex < 0) return msgs;
-  //     const newMsgs = [...msgs];
-  //     newMsgs.splice(targetIndex, 1, newMsg);
-  //     return newMsgs;
-  //   });
-  //   doneEdit();
-  // };
-
-  // const onDelete = async (id) => {
-  //   const receivedId = await fetcher(
-  //     "delete",
-  //     `/messages/${id}`
-  //     // {
-  //     //   params: { userId }, // object 주의
-  //     // }
-  //   );
-  //   if (!receivedId) throw Error("something is wrong");
-
-  //   setMsgs((msgs) => {
-  //     const targetIndex = msgs.findIndex((msg) => msg.id === receivedId + ""); // 값이 없으면 -1
-  //     if (targetIndex < 0) return msgs;
-  //     const newMsgs = [...msgs];
-  //     newMsgs.splice(targetIndex, 1 /* 새로운 데이터 없음*/);
-  //     return newMsgs;
-  //   });
-  // };
+  const { data, error, isError, isLoading, fetchNextPage, hasNextPage } =
+    useInfiniteQuery(QueryKeys.MESSAGES, queryFn, queryOptions);
 
   const { mutate: onCreate } = useMutation(
-    ({ text }: any) => fetcher(CREATE_MESSAGE, { text, userId }),
+    ({ text }: { text: string }) => fetcher(CREATE_MESSAGE, { text, userId }),
     {
       onSuccess: ({ createMessage }) => {
         client.setQueryData(QueryKeys.MESSAGES, (old: any) => {
           return {
-            messages: [createMessage, ...old.messages],
+            pageParam: old.pageParam,
+            pages: [
+              { messages: [createMessage, ...old.pages[0].messages] },
+              ...old.pages.slice(1),
+            ],
           };
         });
       },
@@ -124,61 +102,45 @@ const MsgList: FC<Props> = (props): JSX.Element => {
   );
 
   const doneEdit = () => setEditingId(null);
-  const queryFn = () => fetcher(GET_MESSAGES);
-
-  const { data, error, isError, isLoading } = useQuery(
-    QueryKeys.MESSAGES,
-    queryFn
-  );
 
   useEffect(() => {
-    if (!data?.messages) return;
-    setMsgs(data?.messages);
-  }, [data?.messages]);
+    if (!data?.pages) return;
+    // const data.params = [{messages:[....]},{messages:[....]}] => [{messages:[....]}]
+    // const mergedMsgs = data.pages.flatMap((depth) => depth.messages);
+    setMsgs(data?.pages);
+  }, [data?.pages]);
+
+  useEffect(() => {
+    if (intersecting && hasNextPage) fetchNextPage();
+  }, [intersecting, hasNextPage]);
+
+  console.log("render");
 
   if (isError) {
     console.error(error);
     return null;
   }
 
-  const getMessages = async () => {
-    const newMsgs = await fetcher(
-      "get",
-      "/messages"
-      // {
-      //   params: { cursor: msgs[msgs.length - 1]?.id || "" },
-      // }
-    );
-    if (newMsgs.length === 0) {
-      // setHasNext(false);
-      return;
-    }
-    setMsgs((msgs) => [...msgs, ...newMsgs]);
-  };
-
-  // useEffect(() => {
-  //   if (intersecting && hasNext) getMessages();
-  // }, [intersecting]);
-
-  console.log("render");
   return (
     <React.Fragment>
       {userId && <MsgInput mutate={onCreate} />}
       <Messages>
-        {msgs.map((item) => (
-          <MsgItem
-            key={item.id}
-            onUpdate={onUpdate}
-            isEditing={editingId === item.id}
-            startEdit={() => setEditingId(item.id)}
-            onDelete={() => onDelete(item.id)}
-            myId={userId}
-            user={users.find((x) => x.id === item.userId)}
-            {...item}
-          />
-        ))}
+        {msgs.map(({ messages }: any) =>
+          messages.map((item) => (
+            <MsgItem
+              key={item.id}
+              onUpdate={onUpdate}
+              isEditing={editingId === item.id}
+              startEdit={() => setEditingId(item.id)}
+              onDelete={() => onDelete(item.id)}
+              myId={userId}
+              user={users.find((x) => x.id === item.userId)}
+              {...item}
+            />
+          ))
+        )}
       </Messages>
-      {/* <FetchMore ref={fetchMoreEl} /> */}
+      <FetchMore ref={fetchMoreEl} />
     </React.Fragment>
   );
 };
