@@ -1,6 +1,7 @@
 import React, { FC } from "react";
 import styled from "styled-components";
 
+import MsgItem from "./MsgItem";
 import { MessageType } from "../types/messages";
 import { UsersType } from "../types/users";
 

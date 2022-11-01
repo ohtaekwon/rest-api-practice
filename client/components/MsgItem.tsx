@@ -1,9 +1,13 @@
 import React, { FC } from "react";
 import styled from "styled-components";
 
-type Props = {};
+type Props = {
+  userId: string;
+  timestamp: number;
+  text: string;
+};
 const MsgItem: FC<Props> = (props): JSX.Element => {
-  const {} = props;
+  const { userId, timestamp, text } = props;
   return (
     <Wrapper>
       <Container>
@@ -18,7 +22,7 @@ const MsgItem: FC<Props> = (props): JSX.Element => {
             hour12: true,
           })}
         </Sub>
-        <TextContainer></TextContainer>
+        <TextContainer>{text}</TextContainer>
 
         <ButtonContainer>
           <Button type="button">수정하기</Button>
