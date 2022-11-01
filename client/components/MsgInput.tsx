@@ -1,32 +1,12 @@
-import React, { FC, useRef } from "react";
-import { UseMutateFunction } from "react-query";
+import React, { FC } from "react";
 import styled from "styled-components";
 
-type Props = {
-  // mutate: ({text: string, id?: string}) => void;
-  mutate: any;
-  id?: string;
-  text?: string;
-};
+type Props = {};
 
 const MsgInput: FC<Props> = (props): JSX.Element => {
-  const { mutate, id = undefined, text = "" } = props;
-
-  const textRef = useRef(null);
-  const onSubmit = (event) => {
-    event.preventDefault();
-    event.stopPropagation();
-    const text = textRef.current.value;
-    textRef.current.value = "";
-    mutate({ text, id });
-  };
   return (
-    <Form onSubmit={onSubmit}>
-      <TextArea
-        ref={textRef}
-        placeHolder={"내용을 입력해주세요"}
-        defaultValue={text}
-      />
+    <Form>
+      <TextArea placeHolder={"내용을 입력해주세요"} />
       <Button type="submit">확인</Button>
     </Form>
   );
