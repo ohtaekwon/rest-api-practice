@@ -1,37 +1,13 @@
 import React, { FC } from "react";
 import styled from "styled-components";
-import { UserType } from "../types/users";
-import MsgInput from "./MsgInput";
 
-type Props = {
-  id: string;
-  userId: string;
-  timestamp: number;
-  text: string;
-  onUpdate: (text, id) => void;
-  isEditing: boolean;
-  startEdit: () => void;
-  onDelete: (id: string) => void;
-  myId: string | string[] | undefined;
-  user: UserType;
-};
+type Props = {};
 const MsgItem: FC<Props> = (props): JSX.Element => {
-  const {
-    id,
-    userId,
-    timestamp,
-    text,
-    onUpdate,
-    isEditing,
-    startEdit,
-    onDelete,
-    myId,
-    user,
-  } = props;
+  const {} = props;
   return (
     <Wrapper>
       <Container>
-        <Id>{user?.nickName} </Id>
+        <Id>{userId}</Id>
         <Sub>
           {new Date(timestamp).toLocaleString("ko-KR", {
             year: "numeric",
@@ -42,25 +18,12 @@ const MsgItem: FC<Props> = (props): JSX.Element => {
             hour12: true,
           })}
         </Sub>
-        <TextContainer>
-          {isEditing ? (
-            <>
-              <MsgInput mutate={onUpdate} id={id} text={text} />
-            </>
-          ) : (
-            <Text>{text}</Text>
-          )}
-        </TextContainer>
-        {myId === userId && (
-          <ButtonContainer>
-            <Button type="button" onClick={startEdit}>
-              수정하기
-            </Button>
-            <Button type="button" onClick={onDelete}>
-              삭제하기
-            </Button>
-          </ButtonContainer>
-        )}
+        <TextContainer></TextContainer>
+
+        <ButtonContainer>
+          <Button type="button">수정하기</Button>
+          <Button type="button">삭제하기</Button>
+        </ButtonContainer>
       </Container>
     </Wrapper>
   );
