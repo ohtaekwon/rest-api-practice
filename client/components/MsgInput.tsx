@@ -1,12 +1,25 @@
-import React, { FC } from "react";
+import React, { FC, useRef } from "react";
 import styled from "styled-components";
 
-type Props = {};
+type Props = {
+  mutate: any;
+  id?: number | string;
+};
 
 const MsgInput: FC<Props> = (props): JSX.Element => {
+  const { mutate, id = undefined } = props;
+  const textRef = useRef(null);
+
+  const onSubmit = (event) => {
+    event.preventDefault();
+    event.stopPropagation();
+    const text = textRef.current.value;
+    textRef.current.value = "";
+    mutate(text, id);
+  };
   return (
-    <Form>
-      <TextArea placeHolder={"내용을 입력해주세요"} />
+    <Form onSubmit={onSubmit}>
+      <TextArea ref={textRef} placeHolder={"내용을 입력해주세요"} />
       <Button type="submit">확인</Button>
     </Form>
   );

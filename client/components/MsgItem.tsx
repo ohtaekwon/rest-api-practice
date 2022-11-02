@@ -1,13 +1,19 @@
 import React, { FC } from "react";
 import styled from "styled-components";
+import MsgInput from "./MsgInput";
 
 type Props = {
+  id: number | string;
   userId: string;
   timestamp: number;
   text: string;
+  onUpdate: (text: string, id: number) => void;
+  isEditing: boolean;
+  startEdit: (value: any) => void;
 };
 const MsgItem: FC<Props> = (props): JSX.Element => {
-  const { userId, timestamp, text } = props;
+  const { id, userId, timestamp, text, onUpdate, isEditing, startEdit } = props;
+
   return (
     <Wrapper>
       <Container>
@@ -22,10 +28,15 @@ const MsgItem: FC<Props> = (props): JSX.Element => {
             hour12: true,
           })}
         </Sub>
-        <TextContainer>{text}</TextContainer>
-
+        {isEditing ? (
+          <MsgInput mutate={onUpdate} id={id} />
+        ) : (
+          <TextContainer>{text}</TextContainer>
+        )}
         <ButtonContainer>
-          <Button type="button">수정하기</Button>
+          <Button type="button" onClick={startEdit}>
+            수정하기
+          </Button>
           <Button type="button">삭제하기</Button>
         </ButtonContainer>
       </Container>
