@@ -1,7 +1,13 @@
 import React from "react";
-import type { NextPage } from "next";
+import type {
+  GetServerSideProps,
+  GetServerSidePropsContext,
+  NextPage,
+} from "next";
 import styled from "styled-components";
+
 import MsgList from "../components/MsgList";
+
 import { MessageType } from "../types/messages";
 import { UsersType } from "../types/users";
 
@@ -20,6 +26,13 @@ const Home: NextPage<Props> = (props) => {
 
 export default Home;
 
+export const getServerSideProps: GetServerSideProps = async (
+  context: GetServerSidePropsContext
+) => {
+  return {
+    props: {},
+  };
+};
 const Main = styled.main`
   width: 600px;
   margin: 0 auto;
