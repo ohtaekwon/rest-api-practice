@@ -15,16 +15,27 @@
 - 섹션 7. 기타 library 소개
 - 섹션 8. TS 적용기
 
+#### [섹션 2 - 요약 바로가기](https://github.com/ohtaekwon/rest-api-practice/tree/ch2-rest-api-server/server)
+
 ## 실행방법
 
-#### 1. server
+- mac 환경일 시,
+
+```bash
+yarn run server
+yarn run client
+```
+
+- window 환경일 시,
+
+#### run server
 
 ```bash
 cd /server
 yarn run start
 ```
 
-#### 2. client
+#### run client
 
 ```bash
 cd /client
