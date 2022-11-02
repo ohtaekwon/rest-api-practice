@@ -1,5 +1,6 @@
 import React, { FC, useEffect, useState } from "react";
 import styled from "styled-components";
+import { useRouter } from "next/router";
 
 import MsgItem from "./MsgItem";
 import MsgInput from "./MsgInput";
@@ -8,9 +9,6 @@ import fetcher from "../fetcher";
 
 import { MessageType } from "../types/messages";
 import { UsersType } from "../types/users";
-
-const UserIds = ["roy", "jay"];
-const getRandomUserId = () => UserIds[Math.round(Math.random())];
 
 type Message = {
   id: number;
@@ -21,44 +19,52 @@ type Message = {
 
 type Props = {};
 const MsgList: FC<Props> = (): JSX.Element => {
+  const {
+    query: { userId = "" },
+  } = useRouter();
   const [msgs, setMsgs] = useState<Message[]>([]); // 변경을 감지하기 위해서 state를 이용한다.
   const [editingId, setEditingId] = useState(null);
 
-  const onCrate = (text) => {
-    const newMsg = {
-      id: msgs.length + 1,
-      userId: getRandomUserId(),
-      timestamp: Date.now(),
-      text: `${msgs.length + 1} ${text}`,
-    };
-    setMsgs((msgs) => [newMsg, ...msgs]);
-  };
   const doneEdit = () => setEditingId(null);
 
-  const onUpdate = (text, id) => {
+  const onCrate = async (text) => {
+    const newMsg = await fetcher("post", "/messages", {
+      text,
+      userId,
+    });
+    if (!newMsg) throw Error("post할 수 없습니다.");
+    setMsgs((msgs) => [newMsg, ...msgs]);
+  };
+
+  const onUpdate = async (text, id) => {
+    const newMsg = await fetcher("put", `/messages/${id}`, {
+      text,
+      userId,
+    });
+    if (!newMsg) throw Error("put할 수 없습니다.");
     setMsgs((msgs) => {
       const targetIndex = msgs.findIndex((msg) => msg.id === id);
       if (targetIndex < 0) return msgs;
       const newMsgs = [...msgs]; // 새로운 배열로 만들고
-      newMsgs.splice(targetIndex, 1, {
-        // 새로운 메시지
-        ...msgs[targetIndex],
-        text, // text만 새것으로
-      });
+      newMsgs.splice(targetIndex, 1, newMsg);
       return newMsgs;
     });
     doneEdit();
   };
 
-  const onDelete = (id) => {
-    setMsgs((msgs) => {
-      const targetIndex = msgs.findIndex((msg) => msg.id === id);
+  const onDelete = async (id) => {
+    const receivedId = await fetcher("delete", `/messages/${id}`, {
+      params: { userId },
+    });
+    setMsgs((msgs: any) => {
+      const targetIndex = msgs.findIndex((msg) => msg.id === receivedId + "");
       if (targetIndex < 0) return msgs;
       const newMsgs = [...msgs];
       newMsgs.splice(targetIndex, 1);
       return newMsgs;
     });
   };
+
   const getMessages = async () => {
     const msgs = await fetcher("get", "/messages");
     setMsgs(msgs);
@@ -83,6 +89,7 @@ const MsgList: FC<Props> = (): JSX.Element => {
             onDelete={() => onDelete(msg.id)}
             startEdit={() => setEditingId(msg.id)}
             isEditing={editingId === msg.id}
+            myId={userId}
           />
         ))}
       </Messages>
