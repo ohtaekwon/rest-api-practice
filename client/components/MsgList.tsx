@@ -75,7 +75,7 @@ const MsgList: FC<Props> = (): JSX.Element => {
 
   return (
     <>
-      <MsgInput mutate={onCrate} />
+      {userId && <MsgInput mutate={onCrate} />}
       <Messages>
         {msgs.map((msg) => (
           <MsgItem
