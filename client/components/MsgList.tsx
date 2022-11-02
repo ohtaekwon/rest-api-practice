@@ -65,7 +65,7 @@ const MsgList: FC<Props> = (): JSX.Element => {
       return newMsgs;
     });
   };
-  console.log("msgs", msgs);
+  console.log(JSON.stringify(msgs));
   return (
     <>
       <MsgInput mutate={onCrate} />
