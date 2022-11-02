@@ -4,10 +4,11 @@ import styled from "styled-components";
 type Props = {
   mutate: any;
   id?: number | string;
+  text?: string;
 };
 
 const MsgInput: FC<Props> = (props): JSX.Element => {
-  const { mutate, id = undefined } = props;
+  const { mutate, id = undefined, text = "" } = props;
   const textRef = useRef(null);
 
   const onSubmit = (event) => {
@@ -19,7 +20,11 @@ const MsgInput: FC<Props> = (props): JSX.Element => {
   };
   return (
     <Form onSubmit={onSubmit}>
-      <TextArea ref={textRef} placeHolder={"내용을 입력해주세요"} />
+      <TextArea
+        ref={textRef}
+        placeHolder={"내용을 입력해주세요"}
+        defaultValue={text}
+      />
       <Button type="submit">확인</Button>
     </Form>
   );

@@ -39,6 +39,7 @@ const MsgList: FC<Props> = (): JSX.Element => {
     };
     setMsgs((msgs) => [newMsg, ...msgs]);
   };
+  const doneEdit = () => setEditingId(null);
 
   const onUpdate = (text, id) => {
     setMsgs((msgs) => {
@@ -55,8 +56,16 @@ const MsgList: FC<Props> = (): JSX.Element => {
     doneEdit();
   };
 
-  const doneEdit = () => setEditingId(null);
-
+  const onDelete = (id) => {
+    setMsgs((msgs) => {
+      const targetIndex = msgs.findIndex((msg) => msg.id === id);
+      if (targetIndex < 0) return msgs;
+      const newMsgs = [...msgs];
+      newMsgs.splice(targetIndex, 1);
+      return newMsgs;
+    });
+  };
+  console.log("msgs", msgs);
   return (
     <>
       <MsgInput mutate={onCrate} />
@@ -65,10 +74,11 @@ const MsgList: FC<Props> = (): JSX.Element => {
           <MsgItem
             key={msg.id}
             id={msg.id}
-            userId={msg.userId()}
+            userId={msg.userId}
             timestamp={msg.timestamp}
             text={msg.text}
             onUpdate={onUpdate}
+            onDelete={() => onDelete(msg.id)}
             startEdit={() => setEditingId(msg.id)}
             isEditing={editingId === msg.id}
           />

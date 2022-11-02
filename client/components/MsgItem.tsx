@@ -7,12 +7,22 @@ type Props = {
   userId: string;
   timestamp: number;
   text: string;
-  onUpdate: (text: string, id: number) => void;
+  onUpdate: (text: string, id: Props["id"]) => void;
+  onDelete: (id: Props["id"]) => void;
   isEditing: boolean;
   startEdit: (value: any) => void;
 };
 const MsgItem: FC<Props> = (props): JSX.Element => {
-  const { id, userId, timestamp, text, onUpdate, isEditing, startEdit } = props;
+  const {
+    id,
+    userId,
+    timestamp,
+    text,
+    onUpdate,
+    onDelete,
+    isEditing,
+    startEdit,
+  } = props;
 
   return (
     <Wrapper>
@@ -29,7 +39,7 @@ const MsgItem: FC<Props> = (props): JSX.Element => {
           })}
         </Sub>
         {isEditing ? (
-          <MsgInput mutate={onUpdate} id={id} />
+          <MsgInput mutate={onUpdate} id={id} text={text} />
         ) : (
           <TextContainer>{text}</TextContainer>
         )}
@@ -37,7 +47,9 @@ const MsgItem: FC<Props> = (props): JSX.Element => {
           <Button type="button" onClick={startEdit}>
             수정하기
           </Button>
-          <Button type="button">삭제하기</Button>
+          <Button type="button" onClick={onDelete}>
+            삭제하기
+          </Button>
         </ButtonContainer>
       </Container>
     </Wrapper>
