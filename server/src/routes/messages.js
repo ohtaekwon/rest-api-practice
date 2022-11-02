@@ -35,16 +35,21 @@ const messagesRoute = [
     route: "/messages",
     handler: (req, res) => {
       const { body, query, params } = req; // req안에는 body, query, params가 들어 있고, body안에는 새 글이 등록된 text가 있다.
-      const msgs = getMsgs();
-      const newMsg = {
-        id: v4(),
-        text: body.text,
-        userId: body.userId,
-        timestamp: Date.now(),
-      };
-      msgs.unshift(newMsg);
-      setMsgs(msgs);
-      res.send(newMsg);
+      try {
+        if (!body.userId) throw Error("no userId");
+        const msgs = getMsgs();
+        const newMsg = {
+          id: v4(),
+          text: body.text,
+          userId: body.userId,
+          timestamp: Date.now(),
+        };
+        msgs.unshift(newMsg);
+        setMsgs(msgs);
+        res.send(newMsg);
+      } catch (err) {
+        res.status(500).send({ error: err });
+      }
     },
   },
   {
