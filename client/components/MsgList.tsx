@@ -19,9 +19,8 @@ type Message = {
 
 type Props = {};
 const MsgList: FC<Props> = (): JSX.Element => {
-  const {
-    query: { userId = "" },
-  } = useRouter();
+  const { query } = useRouter();
+  const userId = query.userId || query.userid || "";
   const [msgs, setMsgs] = useState<Message[]>([]); // 변경을 감지하기 위해서 state를 이용한다.
   const [editingId, setEditingId] = useState(null);
 
