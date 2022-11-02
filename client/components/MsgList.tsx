@@ -1,9 +1,7 @@
-import React, { FC, useEffect, useState } from "react";
+import React, { FC, useState } from "react";
 import styled from "styled-components";
 
 import MsgItem from "./MsgItem";
-import { MessageType } from "../types/messages";
-import { UsersType } from "../types/users";
 import MsgInput from "./MsgInput";
 
 const UserIds = ["roy", "jay"];
@@ -92,10 +90,4 @@ export default MsgList;
 const Messages = styled.ul`
   width: 100%;
   padding: 0;
-`;
-const FetchMore = styled.div`
-  border-color: transparent;
-  height: 1px;
-  margin-bottom: 1px;
-  padding-bottom: 1px;
 `;
