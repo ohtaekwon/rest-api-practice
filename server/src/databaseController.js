@@ -18,7 +18,7 @@ export const readDB = (target) => {
   }
 };
 
-export const writeDb = (target, data) => {
+export const writeDB = (target, data) => {
   // 인자로, target뿐만 아니라, 새로 덮어씌울 data도 가져온다.
   try {
     // writeFileSync의 두번째 인자로, 덮어 씌울 데이터를 넣어준다.
